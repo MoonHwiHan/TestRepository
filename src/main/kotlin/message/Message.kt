@@ -19,3 +19,4 @@ class OtherImageMessage(
 ) : OtherMessage(userId, profileImage)
 
 class Some()
+class Some2()

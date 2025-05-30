@@ -5,3 +5,5 @@ class SomeClass {
         println("run")
     }
 }
+
+class AAA()

@@ -17,3 +17,5 @@ class OtherImageMessage(
     profileImage: String,
     val imageUrl: String
 ) : OtherMessage(userId, profileImage)
+
+class Some()

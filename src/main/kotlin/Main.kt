@@ -14,5 +14,5 @@ fun main() {
     car = Potter()
     car.drive() //하늘을 날음
 
-    println("hell")
+    println("hello")
 }

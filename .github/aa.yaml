@@ -1,0 +1,47 @@
+name: Deploy from PR comment
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  deploy:
+    if: |
+      github.event.issue.pull_request && startsWith(github.event.comment.body, '/deploy')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract PR number
+        id: vars
+        run: |
+          PR_NUMBER=$(jq .issue.number "$GITHUB_EVENT_PATH")
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+      - name: Get commit messages from PR
+        run: |
+          # PR 브랜치 정보 얻기
+          PR_JSON=$(gh pr view $PR_NUMBER --json headRefName,headRepositoryOwner,headRepository)
+          BRANCH=$(echo "$PR_JSON" | jq -r '.headRefName')
+          REPO=$(echo "$PR_JSON" | jq -r '.headRepository.name')
+          OWNER=$(echo "$PR_JSON" | jq -r '.headRepositoryOwner.login')
+
+          git remote add pr-origin https://github.com/$OWNER/$REPO.git
+          git fetch pr-origin $BRANCH
+
+          # 커밋 메시지들에서 #숫자 포함된 메시지 필터링
+          CANDIDATE=$(git log pr-origin/$BRANCH --pretty=format:"%s" | grep -E '#[0-9]+' | head -n 1)
+
+          # 그 메시지 안의 가장 마지막 #숫자 추출
+          ISSUE_NUMBER=$(echo "$CANDIDATE" | grep -oE '#[0-9]+' | tail -n1 | sed 's/#//')
+
+          echo "🎯 최종 커밋 메시지: $CANDIDATE"
+          echo "📌 추출된 이슈 번호: #$ISSUE_NUMBER"
+
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+
+      # 이후 원하는 배포 처리 진행 가능
+      - name: Comment
+        run: gh pr comment ${{ ISSUE_NUMBER }} --body "🚀 넘버넘버 입니다."

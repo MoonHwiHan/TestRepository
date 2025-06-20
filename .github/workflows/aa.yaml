@@ -41,7 +41,9 @@ jobs:
           echo "📌 추출된 이슈 번호: #$ISSUE_NUMBER"
 
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+        env:
+          PR_NUMBER: ISSUE_NUMBER
 
       # 이후 원하는 배포 처리 진행 가능
       - name: Comment
-        run: gh pr comment ${{ ISSUE_NUMBER }} --body "🚀 넘버넘버 입니다."
+        run: gh pr comment ${{ PR_NUMBER }} --body "🚀 넘버넘버 입니다."
